@@ -13,7 +13,11 @@ export WAN_IP="$([[ $(curl --silent whatismyip.akamai.com) =~ ^([0-9]{1,3}([.][0
 red="\e[00;31m"; grn="\e[00;32m"; ylw="\e[00;33m"; yel="$ylw"; blu="\e[00;34m"; pur="\e[00;35m"; cyn="\e[00;36m"; wht="\e[00;37m"; r="\e[00m"; R="$r\n"
 gry="\e[00;37;02;03m"; bkto="${red}[$r"; bktc="${red}]$r"; gld="\e[00;33;03m"; gry_itl="\e[00;37;02m"
 
-
+if [[ -d ~/bin ]] ; then
+	printf "$red>$gry Creating the directory ${gld}~/bin$R"
+	mkdir -p ~/bin || printf "${red}> \e[01mERROR!${gry} Couldn't create ${gld}~/bin$R"
+fi
+[[ $PATH =~ ^(([-_[:alnum:]/]+:)+)?${HOME}/bin((:[-_[:alnum:]/]+)+)?$ ]] || PATH+=":${HOME}/bin"
 
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
