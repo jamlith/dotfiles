@@ -26,8 +26,13 @@ endfunction
 
 autocmd BufNewFile,BufRead *.html call HTMLconf()
 
-
+" Chose this theme due to an issue with the windows terminal i've been
+" using has some almost impossible to read color combos (specifically blue
+" on black) that was minimuzed with this color scheme.  It seems like an
+" all-around good choice, but theres a good chance that it wont translate
+" ... you can uncomment the following line to revert to the default scheme.
 colorscheme slate
+"colorscheme default
 
 
 noremap <C-Up> <C-W><Up><C-W>_
