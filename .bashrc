@@ -19,6 +19,25 @@ if [[ ! -d ~/bin ]] ; then
 fi
 [[ $PATH =~ ^(([-_[:alnum:]/]+:)+)?${HOME}/bin((:[-_[:alnum:]/]+)+)?$ ]] || PATH+=":${HOME}/bin"
 
+dumpvars()
+{
+  local list="A B C D E F G H I J K L M N O P Q R S T U V W X Y Z"
+  local AAAAAA=""
+  for A in $list ; do
+    AAAAAA+="${gld} $A:\n"
+    local a=$(echo $A | tr [:upper:] [:lower:])
+    local evla="echo \"\${!$A*} \${!$a*}\"";
+    local list2=$(eval "$evla")
+    for v in $list2 ; do
+      local evlb="echo \${$v}"
+      local valb=$(eval "$evlb")
+      AAAAAA+="    \e[00;94m$v\e[00;30m:${gry} '$valb'$R"
+    done
+    output+="\n"
+  done
+  printf "$AAAAAA\n"
+}
+
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
     HISTCONTROL=ignoreboth
