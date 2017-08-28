@@ -1,3 +1,4 @@
+# BASH AUTOEXEC SCRIPT, MODDED FOR THE BASH CONSOLE IN WINDOWS.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 # If not running interactively, don't do anything
@@ -5,21 +6,59 @@ case $- in
     *i*) ;;
       *) return;;
 esac
-export EDITOR="${VISUAL:=vim}"
-export VISUAL
-export DEVHOME="/mnt/d/dev"
-export WAN_IP="$([[ $(curl --silent whatismyip.akamai.com) =~ ^([0-9]{1,3}([.][0-9]{1,3}){3})$ ]] && echo ${BASH_REMATCH[1]} || echo 'wan_err')";
 
-red="\e[00;31m"; grn="\e[00;32m"; ylw="\e[00;33m"; yel="$ylw"; blu="\e[00;34m"; pur="\e[00;35m"; cyn="\e[00;36m"; wht="\e[00;37m"; r="\e[00m"; R="$r\n"
-gry="\e[00;37;02;03m"; bkto="${red}[$r"; bktc="${red}]$r"; gld="\e[00;33;03m"; gry_itl="\e[00;37;02m"
 
-if [[ ! -d ~/bin ]] ; then
-	printf "$red>$gry Creating the directory ${gld}~/bin$R"
-	mkdir -p ~/bin || printf "${red}> \e[01mERROR!${gry} Couldn't create ${gld}~/bin$R"
-fi
-[[ $PATH =~ ^(([-_[:alnum:]/]+:)+)?${HOME}/bin((:[-_[:alnum:]/]+)+)?$ ]] || PATH+=":${HOME}/bin"
+export DEV="/mnt/c/Users/jamli/dev";		# REDIRECT ALL REQUESTS FOR HOME TO THE USER HOME IN WINDOWS FILESYSTEM
+export LOME="/home/james";					# $LOME will point to the users home directory on the linux filesystem
+export HOME="/mnt/c/Users/jamli";			# Changed the target of $HOME, ~ should now expand to the windows dir.  The old directory is full of settings and other files that programs will be looking for in the wrong place.  If this becomes an issue, copy the hidden dirs from $LOME to ~.
 
-dumpvars()
+
+export EDITOR="${VISUAL:=vim}";		# Set vim to the default cli text editor.
+export VISUAL=$EDITOR;						# Covering all the bases.
+export WAN="$([[ $(curl --silent whatismyip.akamai.com) =~ ^([0-9]{1,3}([.][0-9]{1,3}){3})$ ]] && echo ${BASH_REMATCH[1]} || echo 'wan_err')";       # Always valid
+export LAN="$([[ $(ifconfig | grep -e "wifi0" -A1) =~ inet\ addr\:([0-9]{1,3}(.[0-9]{1,3}){3}) ]] && echo ${BASH_REMATCH[1]} || echo 'lan_err'))";   # Only valid on the laptop in windows.
+export P5Q="192.168.1.2";       # LAN address for the desktop.
+
+red="\e[00;31m"; grn="\e[00;32m"; ylw="\e[00;33m"; blu="\e[00;34m"; pur="\e[00;35m"; cyn="\e[00;36m"; wht="\e[00;37m"; r="\e[00m"; R="$r\n"
+gry="\e[00;37;02;03m"; gld="\e[00;33;03m"; blk="\e[00;30m"; itl="\e[03m"; bld="\e[01m"; uln="\e[04m"; inv="\e[07m"; lred="\e[00;91m"
+
+printf "${blu}Custom vars:"
+printf "    ${lred}\$${wht}DEV, ${lred}\$${wht}LOME, ${lred}\$${wht}HOME, ${lred}\$${wht}WAN, ${lred}\$${wht}LAN...$R"
+
+
+prompt_yn()
+{
+    if [[ $# -gt 1 ]] ; then
+        local default="y"
+        local msg=""
+        while $# -gt 0; do
+            arg=$1; shift
+            if [[ $arg =~ ^[YyNn]$ ]] ; then
+                default=$arg
+            else
+                msg="$arg $msg"
+            fi
+        done
+    elif [[ $# -eq 1 ]] ; then
+        local msg="$*"
+        local default="n"
+    else
+        local msg="Continue?"
+        local default="y"
+    fi
+
+    printf "${blu}${itl}$msg${wht} ${red}[${wht}$([[ $default =~ $[yY]^ ]] && echo 'Y/n' || echo 'y/N')${red}]${wht} "; read xit
+    if [[ $xit =~ ^[Yy]?$ ]] && [[ $default =~ ^[yY]$ ]] || [[ $xit =~ ^[Nn]?$ ]] && [[ $default =~ ^[Nn]$ ]] ; then
+        # Answer was yes.
+        printf "continue"
+    else
+        # Actions to take if answer was no...
+        printf "return 1..."
+        return 1;
+    fi
+}
+
+dump_vars()
 {
   local list="A B C D E F G H I J K L M N O P Q R S T U V W X Y Z"
   local AAAAAA=""
@@ -55,7 +94,10 @@ dumpvars()
 # make less more friendly for non-text input files, see lesspipe(1)
     [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 # COLOR PROMPT
-	PS1='\[\e[00;31m\][\[\e[00m\]\u@\h\[\e[00;34m\] \w\[\e[00;31m\]]\$\[\e[00m\] '
+	#PS1='\[\e[00;31m\][\[\e[00m\]\u@\h\[\e[00;34m\] \w\[\e[00;31m\]]\$\[\e[00m\] '
+    PROMPT_DIRTRIM=3
+  	PS1='\[\e[00;31m\][\[\e[00;37m\]\u@\e[01m\h\[\e[00;94m\] \w\[\e[00;31m\]]\$\[\e[00;37m\] '
+
 	#PS1='${debian_chroot:+($debian_chroot}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
