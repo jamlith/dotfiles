@@ -9,21 +9,48 @@ esac
 
 
 export DEV="/mnt/c/Users/jamli/dev";		# REDIRECT ALL REQUESTS FOR HOME TO THE USER HOME IN WINDOWS FILESYSTEM
-export LOME="/home/james";					# $LOME will point to the users home directory on the linux filesystem
-export HOME="/mnt/c/Users/jamli";			# Changed the target of $HOME, ~ should now expand to the windows dir.  The old directory is full of settings and other files that programs will be looking for in the wrong place.  If this becomes an issue, copy the hidden dirs from $LOME to ~.
+export LOME="/home/james";					# $LOME will pointo the users home directory on the linux filesystem
+export HOME="/mnt/c/Users/jamli"; # Changed the target of $HOME, ~ should now expand to the windows dir.  The old directory is full of settings and other files that programs will be looking for in the wrong place.  If this becomes an issue, copy the hidden dirs from $LOME to ~.
 
 
 export EDITOR="${VISUAL:=vim}";		# Set vim to the default cli text editor.
 export VISUAL=$EDITOR;						# Covering all the bases.
 export WAN="$([[ $(curl --silent whatismyip.akamai.com) =~ ^([0-9]{1,3}([.][0-9]{1,3}){3})$ ]] && echo ${BASH_REMATCH[1]} || echo 'wan_err')";       # Always valid
+export HIP="$(cat ~/.bin/.hip)"
 export LAN="$([[ $(ifconfig | grep -e "wifi0" -A1) =~ inet\ addr\:([0-9]{1,3}(.[0-9]{1,3}){3}) ]] && echo ${BASH_REMATCH[1]} || echo 'lan_err'))";   # Only valid on the laptop in windows.
 export P5Q="192.168.1.2";       # LAN address for the desktop.
 
+
+alias SSH="ssh $P5Q"
+
 red="\e[00;31m"; grn="\e[00;32m"; ylw="\e[00;33m"; blu="\e[00;34m"; pur="\e[00;35m"; cyn="\e[00;36m"; wht="\e[00;37m"; r="\e[00m"; R="$r\n"
-gry="\e[00;37;02;03m"; gld="\e[00;33;03m"; blk="\e[00;30m"; itl="\e[03m"; bld="\e[01m"; uln="\e[04m"; inv="\e[07m"; lred="\e[00;91m"
+lred="\e[00;91m"; lgrn="\e[00;92m";l ylw="\e[00933m"; lblu="\e[00;94m"; lpur="\e[00;95m"; lcyn="\e[00;96m"; lwht="\e[00;97m"
+gry="\e[00;37;02;03m"; gld="\e[00;33;03m"; blk="\e[00;30m"; itl="\e[03m"; bld="\e[01m"; uln="\e[04m"; inv="\e[07m";
 
 printf "${blu}Custom vars:"
 printf "    ${lred}\$${wht}DEV, ${lred}\$${wht}LOME, ${lred}\$${wht}HOME, ${lred}\$${wht}WAN, ${lred}\$${wht}LAN...$R"
+
+refresh_hip()
+{
+	[[ $WAN =~ ^([0-9]{1,3}([.][0-9]{1,3}){3})$ ]] && echo "$WAN" > ~/.bin/.hip
+}
+
+
+if [[ $WAN != $HIP ]] ; then
+    if [[ $LAN =~ 10[.]0[.]0[.][0-9]{1,3} ]] ; then
+        printf "\n${red}[ ${cyn}${bld}WAN IP${wht} has $lred${itl}CHANGED! ${red}]\n  ${lblu}${bld}Update it? ${lred}[${pur}${bld}Y${wht}/n${lred}]$r"
+        read cf
+        if [[ cf =~ ^[Yy]?$ ]] ; then
+            unset cf
+            refresh_hip
+        fi
+        unset cf
+    else
+        printf "\n${red}[ ${cyn}${bld}WAN IP${wht} has $lred${itl}CHANGED! ${red}]\n  ${wht}Run${lred} refresh_hip${wht} to update it.$R"
+    fi
+fi
+
+
 
 prompt_yn()
 {
@@ -48,11 +75,11 @@ prompt_yn()
 
     printf "${blu}${itl}$msg${wht} ${red}[${wht}$([[ $default =~ $[yY]^ ]] && echo 'Y/n' || echo 'y/N')${red}]${wht} "; read xit
     if [[ $xit =~ ^[Yy]?$ ]] && [[ $default =~ ^[yY]$ ]] || [[ $xit =~ ^[Nn]?$ ]] && [[ $default =~ ^[Nn]$ ]] ; then
-        # Answer was yes.
+        # Answer was yes
         printf "continue"
     else
         # Actions to take if answer was no...
-        printf "return 1..."
+        printf "return 1..."lllkklkl
         return 1;
     fi
 }
@@ -74,8 +101,10 @@ prompt_yn()
 # make less more friendly for non-text input files, see lesspipe(1)
     [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 # COLOR PROMPT
-	PS1='\[\e[00;31m\][\[\e[00m\]\u@\h\[\e[00;34m\] \w\[\e[00;31m\]]\$\[\e[00m\] '
+	PS1='\[\e[00;31m\][\[\e[00m\]\u@\h\[\e[00;94m\] \w\[\e[00;31m\]]\$\[\e[00m\] '
 	#PS1='${debian_chroot:+($debian_chroot}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+
+
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
     alias ls='ls --color=auto'
@@ -109,3 +138,4 @@ fi
             . /etc/bash_completion
         fi
     fi
+
